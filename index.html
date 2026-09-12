@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>LAN Scan · 局域网设备扫描</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">📡</span>
+      <div>
+        <h1>LAN Scan</h1>
+        <p class="subtitle">在 iPad Safari 里发现同局域网设备</p>
+      </div>
+    </div>
+    <div class="status-pill" id="statusPill">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">待命</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 控制面板 -->
+    <section class="panel" aria-label="扫描配置">
+      <div class="field">
+        <label>网段</label>
+        <div class="net-row">
+          <input type="text" id="netPrefix" placeholder="192.168.1" value="192.168.1" inputmode="numeric" />
+          <span class="net-sep">.</span>
+          <input type="number" id="hostStart" placeholder="1" value="1" min="0" max="254" />
+          <span class="tilde">~</span>
+          <input type="number" id="hostEnd" placeholder="254" value="254" min="1" max="255" />
+        </div>
+        <div class="quick-nets" id="quickNets">
+          <button type="button" data-net="192.168.1">192.168.1.x</button>
+          <button type="button" data-net="192.168.0">192.168.0.x</button>
+          <button type="button" data-net="10.0.0">10.0.0.x</button>
+          <button type="button" data-net="192.168.31">192.168.31.x</button>
+          <button type="button" data-net="192.168.50">192.168.50.x</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label>探测端口</label>
+          <button type="button" class="link-btn" id="togglePorts">展开/收起</button>
+        </div>
+        <p class="hint">浏览器只能可靠探测 <b>HTTP/HTTPS</b> 端口；SSH/SMB 等纯 TCP 端口无法从网页识别（会误判为关闭）。</p>
+        <div class="ports" id="ports"><!-- 由 JS 渲染 --></div>
+        <div class="custom-port">
+          <input type="number" id="customPort" placeholder="自定义端口" min="1" max="65535" />
+          <button type="button" id="addPort">添加</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>并发数（建议 20–40）</label>
+        <input type="number" id="concurrency" value="30" min="1" max="100" />
+      </div>
+
+      <div class="field">
+        <label>超时（毫秒，建议 800–2000）</label>
+        <input type="number" id="timeoutMs" value="1200" min="300" max="5000" step="100" />
+      </div>
+
+      <div class="actions">
+        <button type="button" id="startBtn" class="btn primary">开始扫描</button>
+        <button type="button" id="stopBtn" class="btn" disabled>停止</button>
+        <button type="button" id="detectBtn" class="btn ghost">自动检测本机网段</button>
+      </div>
+
+      <div class="stats" id="stats">
+        <div class="stat"><span class="num" id="statScanned">0</span><span class="lbl">已探测</span></div>
+        <div class="stat"><span class="num" id="statFound">0</span><span class="lbl">已发现</span></div>
+        <div class="stat"><span class="num" id="statProgress">0%</span><span class="lbl">进度</span></div>
+      </div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+
+      <div class="result-actions">
+        <button type="button" id="exportBtn" class="btn ghost" disabled>导出 CSV</button>
+        <button type="button" id="clearBtn" class="btn ghost" disabled>清空结果</button>
+      </div>
+    </section>
+
+    <!-- 结果区 -->
+    <section class="results" aria-label="扫描结果">
+      <div class="results-empty" id="resultsEmpty">
+        <span class="big">🔍</span>
+        <p>配置网段后点击「开始扫描」。<br />结果会显示在这里。</p>
+        <p class="tiny">提示：首次扫描前请确认 iPad 已连上 Wi‑Fi，且与要扫描的设备在同一局域网。</p>
+      </div>
+      <div class="cards" id="cards"></div>
+    </section>
+  </main>
+
+  <!-- 设备详情 -->
+  <dialog id="detailDialog" class="detail">
+    <form method="dialog">
+      <button class="close" value="close" aria-label="关闭">✕</button>
+    </form>
+    <div id="detailBody"></div>
+  </dialog>
+
+  <footer class="footer">
+    <span id="footerMsg">纯前端实现 · 无需服务器 · 数据不出本机</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
